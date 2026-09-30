@@ -40,6 +40,10 @@ namespace FPS.Combat
         private float _reloadEndTime;
         private int _mag = -1;
 
+        // spray-pattern bookkeeping
+        private int _shotsInBurst;
+        private float _lastShotTime = -999f;
+
         public WeaponDefinition Definition => definition;
         public bool IsAiming => _isAiming;
         public bool IsReloading => _isReloading;
@@ -198,13 +202,52 @@ namespace FPS.Combat
                 FireRay(spread);
             }
 
-            // recoil: instant view kick + cone bloom
-            if (playerCamera != null)
-                playerCamera.ApplyRecoil(definition.recoilPitch, definition.recoilYaw);
+            ApplySprayRecoil();
+
             _bloom = Mathf.Min(definition.maxBloom, _bloom + definition.recoilBloomPerShot);
             ShakeRequested?.Invoke();
 
             _nextFireTime = Time.time + definition.SecondsPerShot;
+        }
+
+        // ------------------------------------------------------------------
+        // Counter-Strike style spray pattern
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// The vertical component climbs for as long as the trigger is held, and the
+        /// horizontal component walks around a circle whose radius grows with the burst,
+        /// so sustained fire traces a rising spiral instead of a static random scatter.
+        /// Stopping for <see cref="WeaponDefinition.patternResetTime"/> snaps it back to
+        /// the first-shot kick.
+        /// </summary>
+        private void ApplySprayRecoil()
+        {
+            if (definition == null || playerCamera == null) return;
+
+            if (Time.time - _lastShotTime > definition.patternResetTime)
+                _shotsInBurst = 0;
+            _lastShotTime = Time.time;
+
+            // Vertical climb. The exponent makes the first few shots controllable and
+            // ramps hard once the burst is committed, like a real spray pattern.
+            float n = _shotsInBurst;
+            float climb = 1f + definition.climbRate * Mathf.Pow(n, 1.35f);
+            float vertical = Mathf.Min(definition.recoilPitch * climb, definition.maxVertical);
+
+            // Horizontal: golden-angle stepping traces a near-circular rosette.
+            float angle = n * 137.507f * Mathf.Deg2Rad;
+            float radius = Mathf.Min(definition.horizontalStep * (1f + n * 0.55f),
+                                     definition.maxHorizontal);
+            float horizontal = Mathf.Cos(angle) * radius;
+            // a little vertical bleed from the circle keeps it from looking mechanical
+            vertical += Mathf.Sin(angle) * radius * 0.3f;
+
+            _shotsInBurst++;
+
+            playerCamera.ApplyRecoil(vertical, horizontal,
+                                     definition.recoilHold, definition.returnSpeed,
+                                     definition.maxRecoilTotal);
         }
 
         private void FireRay(float spreadDegrees)

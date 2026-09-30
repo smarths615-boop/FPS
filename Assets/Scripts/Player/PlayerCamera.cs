@@ -41,6 +41,7 @@ namespace FPS.Player
         private float _recoilPitch;
         private float _recoilYaw;
         private float _recoilHoldLeft;
+        private float _returnRate = 9f;
 
         private float _targetFov;
         private float _appliedFov;
@@ -50,6 +51,8 @@ namespace FPS.Player
         public float CurrentFov => _appliedFov;
         public float Yaw => _yaw;
         public float Pitch => _pitch;
+        /// <summary>Current recoil offset from the aim point: x = yaw, y = pitch.</summary>
+        public Vector2 RecoilOffset => new Vector2(_recoilYaw, _recoilPitch);
 
         private void Awake()
         {
@@ -94,12 +97,14 @@ namespace FPS.Player
         /// <summary>
         /// Applies an instant kick. Degrees are added straight to the view so the shot
         /// snaps rather than eases in, which is what makes a spray pattern feel punchy.
+        /// Hold and return come from the weapon so each gun recovers at its own rate.
         /// </summary>
-        public void ApplyRecoil(float pitchDegrees, float yawDegrees)
+        public void ApplyRecoil(float pitchDegrees, float yawDegrees, float hold, float returnRate, float totalCap)
         {
-            _recoilPitch += pitchDegrees;
-            _recoilYaw += (UnityEngine.Random.value > 0.5f ? 1f : -1f) * yawDegrees;
-            _recoilHoldLeft = recoilHold;
+            _recoilPitch = Mathf.Clamp(_recoilPitch + pitchDegrees, -totalCap, totalCap);
+            _recoilYaw = Mathf.Clamp(_recoilYaw + yawDegrees, -totalCap, totalCap);
+            _recoilHoldLeft = hold > 0f ? hold : recoilHold;
+            _returnRate = returnRate > 0f ? returnRate : returnSpeed;
         }
 
         private void UpdateRecoil(float dt)
@@ -118,7 +123,7 @@ namespace FPS.Player
             }
 
             // exponential return back to the pre-shot aim point
-            float t = 1f - Mathf.Exp(-returnSpeed * dt);
+            float t = 1f - Mathf.Exp(-_returnRate * dt);
             _recoilPitch = Mathf.Lerp(_recoilPitch, 0f, t);
             _recoilYaw = Mathf.Lerp(_recoilYaw, 0f, t);
         }

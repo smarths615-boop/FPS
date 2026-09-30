@@ -49,9 +49,28 @@ namespace FPS.Combat
         public float bloomDecayPerSecond = 2.4f;
 
         [Header("Recoil (camera kick, degrees)")]
+        [Tooltip("Vertical kick on the first shot of a burst.")]
         public float recoilPitch = 0.85f;
+        [Tooltip("Horizontal kick on the first shot of a burst.")]
         public float recoilYaw = 0.28f;
-        public float recoilRecovery = 7f;
+
+        [Header("Spray pattern (Counter-Strike style)")]
+        [Tooltip("Extra vertical climb per consecutive shot, as a fraction of the step.")]
+        public float climbRate = 0.22f;
+        [Tooltip("Hard cap on the vertical kick from one burst, in degrees.")]
+        public float maxVertical = 3.2f;
+        [Tooltip("Ceiling on the TOTAL accumulated view kick while spraying, in degrees. Stops a long burst from swinging the view off screen while the spray still visibly climbs before it plateaus.")]
+        public float maxRecoilTotal = 6f;
+        [Tooltip("Growth of the horizontal circle radius per consecutive shot.")]
+        public float horizontalStep = 0.10f;
+        [Tooltip("Cap on the horizontal radius, in degrees.")]
+        public float maxHorizontal = 0.95f;
+        [Tooltip("Seconds without firing before the pattern resets to its first shot.")]
+        public float patternResetTime = 0.30f;
+        [Tooltip("Seconds the kick is held before it starts returning.")]
+        public float recoilHold = 0.05f;
+        [Tooltip("How fast the view springs back to the original aim point.")]
+        public float returnSpeed = 9f;
 
         [Header("Aim down sights")]
         public bool canAim = true;
@@ -76,7 +95,10 @@ namespace FPS.Combat
             slot = WeaponSlot.Primary,
             baseDamage = 26f, roundsPerMinute = 640f, magazineSize = 30, reserveAmmo = 120,
             baseSpread = 0.14f, moveSpread = 3.2f, adsSpreadMultiplier = 0.3f,
-            recoilPitch = 0.42f, recoilYaw = 0.16f, adsFov = 45f
+            recoilPitch = 0.78f, recoilYaw = 0.12f, adsFov = 45f,
+            climbRate = 0.30f, maxVertical = 2.6f, maxRecoilTotal = 6.2f,
+            horizontalStep = 0.085f, maxHorizontal = 0.8f,
+            returnSpeed = 9f
         };
 
         public static WeaponDefinition Smg() => new WeaponDefinition
@@ -85,7 +107,10 @@ namespace FPS.Combat
             slot = WeaponSlot.Primary,
             baseDamage = 21f, roundsPerMinute = 880f, magazineSize = 32, reserveAmmo = 160,
             baseSpread = 0.34f, moveSpread = 2.0f, adsSpreadMultiplier = 0.42f,
-            recoilPitch = 0.32f, recoilYaw = 0.30f, adsFov = 52f
+            recoilPitch = 0.52f, recoilYaw = 0.16f, adsFov = 52f,
+            climbRate = 0.38f, maxVertical = 2.8f, maxRecoilTotal = 7.6f,
+            horizontalStep = 0.15f, maxHorizontal = 1.5f,
+            returnSpeed = 8f
         };
 
         public static WeaponDefinition Shotgun() => new WeaponDefinition
@@ -95,7 +120,9 @@ namespace FPS.Combat
             baseDamage = 13f, roundsPerMinute = 78f, magazineSize = 7, reserveAmmo = 32,
             automatic = false, pelletsPerShot = 9,
             baseSpread = 2.4f, moveSpread = 2.4f, adsSpreadMultiplier = 0.6f,
-            recoilPitch = 1.6f, recoilYaw = 0.35f, adsFov = 62f,
+            recoilPitch = 1.85f, recoilYaw = 0.3f, adsFov = 62f,
+            climbRate = 0.1f, maxVertical = 2.4f, maxRecoilTotal = 3.0f,
+            horizontalStep = 0.1f, maxHorizontal = 0.6f, returnSpeed = 7f,
             range = 45f, falloffStart = 12f, falloffEnd = 34f, falloffFloor = 0.18f
         };
 
@@ -109,7 +136,10 @@ namespace FPS.Combat
             baseSpread = 0.6f, moveSpread = 9.5f, airSpread = 14f,
             adsSpreadMultiplier = 0.02f, crouchSpreadMultiplier = 0.7f,
             recoilBloomPerShot = 1.1f, maxBloom = 4.5f, bloomDecayPerSecond = 1.5f,
-            recoilPitch = 2.4f, recoilYaw = 0.3f,
+            recoilPitch = 2.6f, recoilYaw = 0.3f,
+            climbRate = 0.05f, maxVertical = 3.0f, maxRecoilTotal = 4.5f,
+            horizontalStep = 0.12f, maxHorizontal = 0.7f,
+            returnSpeed = 5.5f, recoilHold = 0.12f,
             canAim = true, isSniper = true, adsFov = 30f,   // ~2x zoom
             range = 400f, falloffStart = 300f, falloffEnd = 400f, falloffFloor = 0.85f
         };
@@ -121,7 +151,9 @@ namespace FPS.Combat
             baseDamage = 27f, roundsPerMinute = 400f, magazineSize = 12, reserveAmmo = 60,
             automatic = false, reloadTime = 1.5f,
             baseSpread = 0.22f, moveSpread = 2.2f, adsSpreadMultiplier = 0.28f,
-            recoilPitch = 0.62f, recoilYaw = 0.22f, adsFov = 50f
+            recoilPitch = 0.85f, recoilYaw = 0.16f, adsFov = 50f,
+            climbRate = 0.26f, maxVertical = 2.0f, maxRecoilTotal = 3.2f,
+            horizontalStep = 0.12f, maxHorizontal = 0.9f, returnSpeed = 9f
         };
 
         public static WeaponDefinition Knife() => new WeaponDefinition

@@ -25,6 +25,32 @@ namespace FPS.EditorTools
             Debug.Log("[FPS] View and recoil reset.");
         }
 
+        [MenuItem("FPS/Debug/Simulate Burst (shows spray pattern)")]
+        public static void SimulateBurst()
+        {
+            var l = Object.FindFirstObjectByType<Player.PlayerLoadout>();
+            var cam = Object.FindFirstObjectByType<Player.PlayerCamera>();
+            if (l == null || l.Primary == null || cam == null)
+            {
+                Debug.LogWarning("[FPS] Need a PlayerLoadout + PlayerCamera in the open scene.");
+                return;
+            }
+
+            var w = l.Primary;
+            l.Equip(FPS.Combat.WeaponSlot.Primary);
+            cam.ResetRecoil();
+
+            var sb = new System.Text.StringBuilder();
+            sb.Append("[FPS] burst pattern for " + w.Definition.displayName + ":");
+            for (int i = 0; i < 12; i++)
+            {
+                w.Fire();
+                Vector2 o = cam.RecoilOffset;
+                sb.Append(string.Format("\n   shot {0,2}: recoilPitch={1,6:F2}  recoilYaw={2,6:F2}", i + 1, o.y, o.x));
+            }
+            Debug.Log(sb.ToString());
+        }
+
         [MenuItem("FPS/Debug/Cycle Weapon (same path as T)")]
         public static void CycleWeapon()
         {
