@@ -17,7 +17,7 @@ namespace FPS.UI
         private PlayerController _player;
         private Health _health;
 
-        private Text _ammoText, _weaponText, _waveText, _hitText;
+        private Text _ammoText, _weaponText, _waveText, _hitText, _roundText, _phaseText;
         private Image _healthFill, _healthBg;
         private RectTransform _crosshair;
         private Image _scope;
@@ -75,6 +75,16 @@ namespace FPS.UI
 
                 var w = _loadout.Active;
                 if (_scope != null) _scope.enabled = w.IsAiming && w.Definition.isSniper;
+                if (_weaponText != null) _weaponText.text = w.Definition.displayName.ToUpperInvariant();
+
+                // read ammo live so it always matches the equipped weapon
+                if (_ammoText != null)
+                {
+                    string ammo = w.Definition.isMelee
+                        ? "--"
+                        : w.CurrentMag + " / " + w.CurrentReserve;
+                    if (_ammoText.text != ammo) _ammoText.text = ammo;
+                }
             }
 
             // hit marker
@@ -104,6 +114,38 @@ namespace FPS.UI
         }
 
         public void SetWave(int wave, int alive) { if (_waveText != null) _waveText.text = "WAVE " + wave + "   ENEMIES " + alive; }
+
+        /// <summary>Round clock plus the weapon-change banner shown during intermission.</summary>
+        public void SetRound(int round, RoundPhase phase, float timeLeft, bool canSwitch)
+        {
+            if (_roundText != null)
+            {
+                int m = Mathf.FloorToInt(timeLeft / 60f);
+                int s = Mathf.FloorToInt(timeLeft % 60f);
+                _roundText.text = "ROUND " + round + "   " + m + ":" + (s < 10 ? "0" : "") + s;
+                _roundText.color = phase == RoundPhase.Intermission
+                    ? new Color(1f, 0.78f, 0.25f)
+                    : Color.white;
+            }
+
+            if (_phaseText != null)
+            {
+                if (phase == RoundPhase.Intermission)
+                {
+                    _phaseText.gameObject.SetActive(true);
+                    _phaseText.text = "PRESS  T  TO CHANGE WEAPON";
+                }
+                else
+                {
+                    _phaseText.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        public void SetWeaponName(string name)
+        {
+            if (_weaponText != null) _weaponText.text = name;
+        }
 
         // ------------------------------------------------------------------
         // UI construction
@@ -146,6 +188,15 @@ namespace FPS.UI
             // ---- wave (top left) ----
             _waveText = NewText(canvasGo.transform, "Wave", font, 20, TextAnchor.UpperLeft, Color.white);
             SetRect(_waveText.rectTransform, new Vector2(0, 1), new Vector2(40, -34), new Vector2(420, 30));
+
+            // ---- round clock (top right) ----
+            _roundText = NewText(canvasGo.transform, "Round", font, 26, TextAnchor.UpperRight, Color.white);
+            SetRect(_roundText.rectTransform, new Vector2(1, 1), new Vector2(-40, -30), new Vector2(420, 36));
+
+            // ---- weapon-change banner (centred) ----
+            _phaseText = NewText(canvasGo.transform, "PhaseBanner", font, 30, TextAnchor.MiddleCenter, new Color(1f, 0.85f, 0.35f));
+            SetRect(_phaseText.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -90), new Vector2(900, 40));
+            _phaseText.gameObject.SetActive(false);
 
             // ---- crosshair ----
             _crosshair = NewImage(canvasGo.transform, "Crosshair", new Color(1f, 1f, 1f, 0.9f)).rectTransform;

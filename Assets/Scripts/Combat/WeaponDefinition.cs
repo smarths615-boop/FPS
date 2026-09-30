@@ -44,7 +44,7 @@ namespace FPS.Combat
         [Tooltip("Multiplier applied to spread while aiming down sights.")]
         public float adsSpreadMultiplier = 0.25f;
         [Tooltip("Cone added per shot and slowly bled off, creating spray control.")]
-        public float recoilBloomPerShot = 0.16f;
+        public float recoilBloomPerShot = 0.11f;
         public float maxBloom = 3.2f;
         public float bloomDecayPerSecond = 2.4f;
 
@@ -76,7 +76,7 @@ namespace FPS.Combat
             slot = WeaponSlot.Primary,
             baseDamage = 26f, roundsPerMinute = 640f, magazineSize = 30, reserveAmmo = 120,
             baseSpread = 0.14f, moveSpread = 3.2f, adsSpreadMultiplier = 0.3f,
-            recoilPitch = 0.8f, recoilYaw = 0.26f, adsFov = 45f
+            recoilPitch = 0.42f, recoilYaw = 0.16f, adsFov = 45f
         };
 
         public static WeaponDefinition Smg() => new WeaponDefinition
@@ -85,7 +85,7 @@ namespace FPS.Combat
             slot = WeaponSlot.Primary,
             baseDamage = 21f, roundsPerMinute = 880f, magazineSize = 32, reserveAmmo = 160,
             baseSpread = 0.34f, moveSpread = 2.0f, adsSpreadMultiplier = 0.42f,
-            recoilPitch = 0.6f, recoilYaw = 0.42f, adsFov = 52f
+            recoilPitch = 0.32f, recoilYaw = 0.30f, adsFov = 52f
         };
 
         public static WeaponDefinition Shotgun() => new WeaponDefinition
@@ -95,21 +95,21 @@ namespace FPS.Combat
             baseDamage = 13f, roundsPerMinute = 78f, magazineSize = 7, reserveAmmo = 32,
             automatic = false, pelletsPerShot = 9,
             baseSpread = 2.4f, moveSpread = 2.4f, adsSpreadMultiplier = 0.6f,
-            recoilPitch = 2.6f, recoilYaw = 0.5f, adsFov = 62f,
+            recoilPitch = 1.6f, recoilYaw = 0.35f, adsFov = 62f,
             range = 45f, falloffStart = 12f, falloffEnd = 34f, falloffFloor = 0.18f
         };
 
         public static WeaponDefinition Sniper() => new WeaponDefinition
         {
             displayName = "Sniper",
-            slot = WeaponSlot.Primary,
+            slot = WeaponSlot.Sniper,
             baseDamage = 118f, headBonus = 1.35f,
             roundsPerMinute = 42f, magazineSize = 5, reserveAmmo = 20,
             automatic = false, reloadTime = 2.9f,
             baseSpread = 0.6f, moveSpread = 9.5f, airSpread = 14f,
             adsSpreadMultiplier = 0.02f, crouchSpreadMultiplier = 0.7f,
             recoilBloomPerShot = 1.1f, maxBloom = 4.5f, bloomDecayPerSecond = 1.5f,
-            recoilPitch = 3.4f, recoilYaw = 0.5f, recoilRecovery = 3.4f,
+            recoilPitch = 2.4f, recoilYaw = 0.3f,
             canAim = true, isSniper = true, adsFov = 30f,   // ~2x zoom
             range = 400f, falloffStart = 300f, falloffEnd = 400f, falloffFloor = 0.85f
         };
@@ -121,7 +121,7 @@ namespace FPS.Combat
             baseDamage = 27f, roundsPerMinute = 400f, magazineSize = 12, reserveAmmo = 60,
             automatic = false, reloadTime = 1.5f,
             baseSpread = 0.22f, moveSpread = 2.2f, adsSpreadMultiplier = 0.28f,
-            recoilPitch = 1.1f, recoilYaw = 0.34f, adsFov = 50f
+            recoilPitch = 0.62f, recoilYaw = 0.22f, adsFov = 50f
         };
 
         public static WeaponDefinition Knife() => new WeaponDefinition
@@ -137,7 +137,8 @@ namespace FPS.Combat
     public enum WeaponSlot
     {
         Primary = 0,
-        Sidearm = 1,
-        Melee = 2
+        Sniper = 1,
+        Sidearm = 2,
+        Melee = 3
     }
 }

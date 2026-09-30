@@ -1,10 +1,15 @@
 using UnityEngine;
+using FPS.Core;
 
 namespace FPS.Player
 {
     /// <summary>
-    /// First-person look + aim. Handles the sniper 2x scope zoom by driving camera FOV,
-    /// and offsets the near clip plane so the weapon model does not clip into geometry.
+    /// First-person look, aim and recoil.
+    ///
+    /// Recoil is modelled the way Counter-Strike does it: the shot applies an instant
+    /// kick to the view, the kick is held briefly so it reads on screen, then springs
+    /// back to the original aim point. Vertical and horizontal components are tracked
+    /// separately so a spray pattern can be tuned per weapon.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public class PlayerCamera : MonoBehaviour
@@ -13,26 +18,53 @@ namespace FPS.Player
         [SerializeField] private float sensitivity = 2.2f;
         [SerializeField] private float minPitch = -85f;
         [SerializeField] private float maxPitch = 85f;
+        [Tooltip("Root that yaw is applied to. Auto-resolved to the player when left empty.")]
         [SerializeField] private Transform playerRoot;
 
         [Header("Field of view")]
         [SerializeField] private float baseFov = 70f;
         [SerializeField] private float adsFov = 45f;
         [SerializeField] private float sniperAdsFov = 30f; // ~2x from the 60 base
-        [SerializeField] private float fovLerpSpeed = 14f;
-        [SerializeField] private float sprintFovBonus = 8f;
+        [SerializeField] private float fovLerpSpeed = 16f;
+        [SerializeField] private float sprintFovBonus = 6f;
+
+        [Header("Recoil")]
+        [Tooltip("Seconds the kick is held before it starts returning.")]
+        [SerializeField] private float recoilHold = 0.055f;
+        [SerializeField] private float returnSpeed = 13f;
 
         private Camera _cam;
         private float _pitch;
-        private float _targetFov;
-        private float _appliedFov;
+        private float _yaw;
+
+        // recoil offsets relative to the current aim point
         private float _recoilPitch;
         private float _recoilYaw;
-        private float _recoilRecovery;
+        private float _recoilHoldLeft;
+
+        private float _targetFov;
+        private float _appliedFov;
 
         public Camera Cam => _cam;
         public bool IsAiming { get; private set; }
         public float CurrentFov => _appliedFov;
+        public float Yaw => _yaw;
+        public float Pitch => _pitch;
+
+        private void Awake()
+        {
+            _cam = GetComponent<Camera>();
+            _appliedFov = baseFov;
+            _cam.fieldOfView = baseFov;
+            _cam.nearClipPlane = 0.02f;
+
+            if (playerRoot == null)
+            {
+                var pc = GetComponentInParent<PlayerController>();
+                if (pc != null) playerRoot = pc.transform;
+            }
+            if (playerRoot == null) playerRoot = transform.parent != null ? transform.parent : transform;
+        }
 
         public void SetSniperZoom(bool sniper, bool aiming)
         {
@@ -41,59 +73,70 @@ namespace FPS.Player
             _targetFov = sniper ? sniperAdsFov : adsFov;
         }
 
-        private void Awake()
-        {
-            _cam = GetComponent<Camera>();
-            _appliedFov = baseFov;
-            _cam.fieldOfView = baseFov;
-            _cam.nearClipPlane = 0.02f;
-        }
-
         private void Update()
         {
             Vector2 look = InputHub.Look * sensitivity;
+            _yaw += look.x;
+            _pitch = Mathf.Clamp(_pitch - look.y, minPitch, maxPitch);
 
-            // recoil is applied to the view then springs back
-            _pitch = Mathf.Clamp(_pitch - look.y - _recoilPitch, minPitch, maxPitch);
-            float yaw = look.x + _recoilYaw;
+            UpdateRecoil(Time.deltaTime);
 
-            if (playerRoot != null)
-            {
-                playerRoot.localRotation = Quaternion.Euler(0f, yaw, 0f);
-            }
-            transform.localRotation = Quaternion.Euler(_pitch, 0f, 0f);
+            if (playerRoot != null && playerRoot != transform)
+                playerRoot.localRotation = Quaternion.Euler(0f, _yaw + _recoilYaw, 0f);
+            transform.localRotation = Quaternion.Euler(_pitch + _recoilPitch, 0f, 0f);
 
-            RecoverRecoil(Time.deltaTime);
-
-            // sprinting widens FOV a touch for a sense of speed
             var pc = GetComponentInParent<PlayerController>();
             float bonus = (pc != null && pc.IsSprinting && !IsAiming) ? sprintFovBonus : 0f;
-            float goal = _targetFov + bonus;
-            _appliedFov = Mathf.Lerp(_appliedFov, goal, 1f - Mathf.Exp(-fovLerpSpeed * Time.deltaTime));
+            _appliedFov = Mathf.Lerp(_appliedFov, _targetFov + bonus, 1f - Mathf.Exp(-fovLerpSpeed * Time.deltaTime));
             _cam.fieldOfView = _appliedFov;
         }
 
-        /// <summary>Kick the view upward (and slightly sideways) when firing.</summary>
-        public void ApplyRecoil(float pitchDegrees, float yawDegrees, float recovery = 6f)
+        /// <summary>
+        /// Applies an instant kick. Degrees are added straight to the view so the shot
+        /// snaps rather than eases in, which is what makes a spray pattern feel punchy.
+        /// </summary>
+        public void ApplyRecoil(float pitchDegrees, float yawDegrees)
         {
             _recoilPitch += pitchDegrees;
-            _recoilYaw += (Random.value > 0.5f ? 1f : -1f) * yawDegrees;
-            _recoilRecovery = recovery;
+            _recoilYaw += (UnityEngine.Random.value > 0.5f ? 1f : -1f) * yawDegrees;
+            _recoilHoldLeft = recoilHold;
         }
 
-        private void RecoverRecoil(float dt)
+        private void UpdateRecoil(float dt)
         {
-            if (Mathf.Abs(_recoilPitch) < 0.0001f && Mathf.Abs(_recoilYaw) < 0.0001f) return;
-            float t = 1f - Mathf.Exp(-_recoilRecovery * dt);
+            if (_recoilHoldLeft > 0f)
+            {
+                _recoilHoldLeft -= dt;
+                return;
+            }
+
+            if (Mathf.Abs(_recoilPitch) < 0.0001f && Mathf.Abs(_recoilYaw) < 0.0001f)
+            {
+                _recoilPitch = 0f;
+                _recoilYaw = 0f;
+                return;
+            }
+
+            // exponential return back to the pre-shot aim point
+            float t = 1f - Mathf.Exp(-returnSpeed * dt);
             _recoilPitch = Mathf.Lerp(_recoilPitch, 0f, t);
             _recoilYaw = Mathf.Lerp(_recoilYaw, 0f, t);
         }
 
+        /// <summary>Clears recoil instantly, e.g. on weapon switch or round reset.</summary>
         public void ResetRecoil()
         {
             _recoilPitch = 0f;
             _recoilYaw = 0f;
+            _recoilHoldLeft = 0f;
+        }
+
+        /// <summary>Snaps the view back to level, used when a round restarts.</summary>
+        public void ResetView()
+        {
+            _yaw = 0f;
             _pitch = 0f;
+            ResetRecoil();
         }
     }
 }

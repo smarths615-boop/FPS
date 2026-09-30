@@ -1,4 +1,5 @@
 using UnityEngine;
+using FPS.Core;
 
 namespace FPS.Player
 {

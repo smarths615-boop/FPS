@@ -27,7 +27,7 @@ namespace FPS.Combat
         [Tooltip("Layers the bullet can collide with (world geometry). Enemy hitboxes use DamageZone.")]
         [SerializeField] private LayerMask worldMask = ~0;
 
-        [Header("Events")]
+        // ---- events ----
         public event Action<int, int> AmmoChanged;      // mag, reserve
         public event Action<HitZone, float, bool> ShotResolved; // zone, damage, wasLethal
         public event Action ShakeRequested;
@@ -43,6 +43,13 @@ namespace FPS.Combat
         public WeaponDefinition Definition => definition;
         public bool IsAiming => _isAiming;
         public bool IsReloading => _isReloading;
+
+        /// <summary>Live rounds remaining in the magazine.</summary>
+        public int CurrentMag => _mag < 0 ? definition.magazineSize : _mag;
+        public int CurrentReserve => definition.reserveAmmo;
+
+        /// <summary>Set false by the round director to lock firing during intermission.</summary>
+        public bool CanFire = true;
         public int AmmoInMag => definition.magazineSize;
         public int ReserveAmmo => definition.reserveAmmo;
         public float CurrentSpread => ComputeSpreadDegrees();
@@ -63,6 +70,11 @@ namespace FPS.Combat
         private void Update()
         {
             if (definition == null || viewCamera == null) return;
+            if (!CanFire)
+            {
+                SetAiming(false);
+                return;
+            }
 
             bool fireHeld = definition.isMelee ? InputHub.KnifeHeld : InputHub.FireHeld;
             bool firePressed = fireHeld && !_triggerHeldLastFrame;
@@ -186,9 +198,9 @@ namespace FPS.Combat
                 FireRay(spread);
             }
 
-            // recoil: view kick + cone bloom
+            // recoil: instant view kick + cone bloom
             if (playerCamera != null)
-                playerCamera.ApplyRecoil(definition.recoilPitch, definition.recoilYaw, definition.recoilRecovery);
+                playerCamera.ApplyRecoil(definition.recoilPitch, definition.recoilYaw);
             _bloom = Mathf.Min(definition.maxBloom, _bloom + definition.recoilBloomPerShot);
             ShakeRequested?.Invoke();
 
@@ -203,7 +215,7 @@ namespace FPS.Combat
             if (spreadDegrees > 0.0001f)
             {
                 // uniform random point inside the cone
-                Vector2 disc = Random.insideUnitCircle * spreadDegrees;
+                Vector2 disc = UnityEngine.Random.insideUnitCircle * spreadDegrees;
                 dir = Quaternion.Euler(disc.y, disc.x, 0f) * dir;
             }
 

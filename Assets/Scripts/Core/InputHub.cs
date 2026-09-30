@@ -55,6 +55,16 @@ namespace FPS.Core
         public static bool ReloadHeld => Keyboard.current != null && Keyboard.current[Key.R].isPressed;
         public static bool KnifeHeld => Keyboard.current != null && Keyboard.current[Key.Q].isPressed;
 
+        /// <summary>True on the frame T was pressed - cycles to the next weapon.</summary>
+        public static bool CycleWeaponQueued
+        {
+            get
+            {
+                var k = Keyboard.current;
+                return k != null && k[Key.T].wasPressedThisFrame;
+            }
+        }
+
         public static bool JumpQueued
         {
             get
@@ -84,7 +94,7 @@ namespace FPS.Core
                 if (k[Key.Digit2].wasPressedThisFrame) return 1;
                 if (k[Key.Digit3].wasPressedThisFrame) return 2;
                 if (k[Key.Digit4].wasPressedThisFrame) return 3;
-                if (k[Key.F].wasPressedThisFrame) return 1; // quick-swap to sidearm
+                if (k[Key.F].wasPressedThisFrame) return 2;   // quick-swap to the sidearm
                 return -1;
             }
         }
