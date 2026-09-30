@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0aa2fced725995f4986e8f05a9efe6a1
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302402
+  packageName: mid/high poly rigged weapons pack
+  packageVersion: 1.0
+  assetPath: Assets/WeaponsPack/modelsInFBX/texturesAndMaterials/sniperTaxture/sniperTextureMaterial.mat
+  uploadId: 716108

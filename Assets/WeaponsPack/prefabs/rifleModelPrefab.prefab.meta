@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9cb01e8d5a183804985968d38afa49ad
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302402
+  packageName: mid/high poly rigged weapons pack
+  packageVersion: 1.0
+  assetPath: Assets/WeaponsPack/prefabs/rifleModelPrefab.prefab
+  uploadId: 716108

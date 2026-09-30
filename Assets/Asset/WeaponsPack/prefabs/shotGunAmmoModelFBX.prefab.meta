@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: fae750b263ab0b84883266edff283bb3
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302402
+  packageName: mid/high poly rigged weapons pack
+  packageVersion: 1.0
+  assetPath: Assets/WeaponsPack/prefabs/shotGunAmmoModelFBX.prefab
+  uploadId: 716108

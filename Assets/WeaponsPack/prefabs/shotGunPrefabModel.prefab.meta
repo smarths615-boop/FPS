@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4b12a5f80acf9204e9c0fbf832d9a048
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302402
+  packageName: mid/high poly rigged weapons pack
+  packageVersion: 1.0
+  assetPath: Assets/WeaponsPack/prefabs/shotGunPrefabModel.prefab
+  uploadId: 716108

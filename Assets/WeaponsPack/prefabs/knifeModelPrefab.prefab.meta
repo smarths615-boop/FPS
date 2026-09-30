@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 1404b1f6ca323e54fa4b4bc7074968cc
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302402
+  packageName: mid/high poly rigged weapons pack
+  packageVersion: 1.0
+  assetPath: Assets/WeaponsPack/prefabs/knifeModelPrefab.prefab
+  uploadId: 716108

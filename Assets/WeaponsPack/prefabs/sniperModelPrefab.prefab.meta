@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 945c292cf1eda8b41aba3e07f8ca2892
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302402
+  packageName: mid/high poly rigged weapons pack
+  packageVersion: 1.0
+  assetPath: Assets/WeaponsPack/prefabs/sniperModelPrefab.prefab
+  uploadId: 716108
