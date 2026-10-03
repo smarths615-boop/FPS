@@ -1,0 +1,29 @@
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# IDE and OS files
+.vs/
+.idea/
+*.csproj
+*.sln
+*.slnx
+*.user
+*.userprefs
+*.pidb
+*.suo
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+.vsconfig
+
+# Unity MCP runtime cache
+Library/UnityMCP/
+# Local screenshots produced during editor validation
+Captures/
